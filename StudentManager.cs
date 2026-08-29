@@ -1,380 +1,214 @@
 using System;
 using System.Collections.Generic;
 
-class Program
+class StudentManager : StudentOperations
 {
-    static void Main(string[] args)
+    // List to store students
+    private List<Student> students = new List<Student>();
+
+
+    // Add Student
+    public override bool AddStudent(Student student)
     {
-        // Objects
-        StudentManager manager = new StudentManager();
-        FileManager fileManager = new FileManager();
-        Menu menu = new Menu();
-
-        bool running = true;
-
-        // Menu loop
-        while (running)
+        try
         {
-            try
+            if (student == null)
             {
-                menu.MainScreen();
+                Console.WriteLine("Student data is null.");
+                return false;
+            }
 
-                string choiceInput = Console.ReadLine();
-
-                int choice = int.Parse(choiceInput);
-
-                switch (choice)
+            // Check duplicate Roll Number
+            foreach (Student s in students)
+            {
+                if (s.RollNo == student.RollNo)
                 {
-                    case 1:
-                        AddStudent(manager);
-                        break;
-
-                    case 2:
-                        manager.ViewAllStudents();
-                        break;
-
-                    case 3:
-                        SearchStudent(manager);
-                        break;
-
-                    case 4:
-                        UpdateStudent(manager);
-                        break;
-
-                    case 5:
-                        DeleteStudent(manager);
-                        break;
-
-                    case 6:
-                        fileManager.SaveStudents(
-                            manager.GetStudents());
-                        break;
-
-                    case 7:
-                        List<Student> loadedStudents =
-                            fileManager.LoadStudents();
-
-                        manager.SetStudents(loadedStudents);
-                        break;
-
-                    case 8:
-                        running = false;
-                        Console.WriteLine(
-                            "\nThank You!");
-                        break;
-
-                    default:
-                        Console.WriteLine(
-                            "\nInvalid Choice.");
-                        break;
+                    Console.WriteLine("Roll Number already exists.");
+                    return false;
                 }
             }
-            catch (FormatException ex)
-            {
-                Console.WriteLine(
-                    "\nPlease enter a valid number.");
 
-                Console.WriteLine(
-                    "Error: " + ex.Message);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(
-                    "\nSomething went wrong.");
+            students.Add(student);
 
-                Console.WriteLine(
-                    "Error: " + ex.Message);
-            }
-            finally
-            {
-                Console.WriteLine(
-                    "\nOperation completed.");
-            }
-        }
-    }
-
-
-    // ==================================================
-    // ADD STUDENT
-    // ==================================================
-
-    static void AddStudent(StudentManager manager)
-    {
-        try
-        {
-            Console.Write("\nEnter Name: ");
-            string name = Console.ReadLine();
-
-            Console.Write("Enter Age: ");
-            int age = int.Parse(Console.ReadLine());
-
-            Console.Write("Enter Roll Number: ");
-            int rollNo = int.Parse(Console.ReadLine());
-
-            Console.Write("Enter Course: ");
-            string course = Console.ReadLine();
-
-            Console.Write("Enter Marks: ");
-            int marks = int.Parse(Console.ReadLine());
-
-
-            // Create Student Object
-            Student student = new Student(
-                rollNo,
-                name,
-                age,
-                course,
-                marks
-            );
-
-
-            // Add Student
-            bool result = manager.AddStudent(student);
-
-            if (result)
-            {
-                Console.WriteLine(
-                    "\nStudent Added Successfully.");
-            }
-            else
-            {
-                Console.WriteLine(
-                    "\nStudent could not be added.");
-            }
-        }
-        catch (FormatException ex)
-        {
-            Console.WriteLine(
-                "\nPlease enter correct numeric value.");
-
-            Console.WriteLine(
-                "Error: " + ex.Message);
-        }
-        catch (ArgumentException ex)
-        {
-            Console.WriteLine(
-                "\nInvalid Student Data.");
-
-            Console.WriteLine(
-                "Error: " + ex.Message);
+            Console.WriteLine("Student added successfully.");
+            return true;
         }
         catch (Exception ex)
         {
-            Console.WriteLine(
-                "\nError: " + ex.Message);
+            Console.WriteLine("Error: " + ex.Message);
+            return false;
         }
     }
 
 
-    // ==================================================
-    // SEARCH STUDENT
-    // ==================================================
-
-    static void SearchStudent(StudentManager manager)
+    // View All Students
+    public override void ViewAllStudents()
     {
         try
         {
-            Console.Write(
-                "\nEnter Roll Number to Search: ");
+            // Check List empty or not
+            if (students.Count == 0)
+            {
+                Console.WriteLine("\nNo Student Found.\n");
+                return;
+            }
 
-            int rollNo = int.Parse(
-                Console.ReadLine());
+            // Check null student
+            foreach (Student student in students)
+            {
+                if (student == null)
+                {
+                    Console.WriteLine("Student data is null.");
+                    return;
+                }
+            }
+
+            Console.WriteLine(
+                "\n================================================================================");
+
+            Console.WriteLine(
+                "                            ALL STUDENTS");
+
+            Console.WriteLine(
+                "================================================================================");
 
 
-            Student student =
-                manager.SearchStudent(rollNo);
+            // Display every student
+            foreach (Student student in students)
+            {
+                Console.WriteLine("\nName         : " + student.name);
+                Console.WriteLine("Age          : " + student.age);
+                Console.WriteLine("Roll Number  : " + student.RollNo);
+                Console.WriteLine("Course       : " + student.Course);
+                Console.WriteLine("Marks        : " + student.Marks);
 
+                Console.WriteLine(
+                    "--------------------------------------------------------------------------------");
+            }
+        }
+        catch (NullReferenceException ex)
+        {
+            Console.WriteLine("Student data is null.");
+            Console.WriteLine("Error: " + ex.Message);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error: " + ex.Message);
+        }
+        finally
+        {
+            Console.WriteLine("View operation completed.");
+        }
+    }
+
+
+    // Search Student
+    public override Student SearchStudent(int rollNo)
+    {
+        try
+        {
+            foreach (Student student in students)
+            {
+                if (student.RollNo == rollNo)
+                {
+                    return student;
+                }
+            }
+
+            return null;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error: " + ex.Message);
+            return null;
+        }
+    }
+
+
+    // Update Student
+    public override bool UpdateStudent(
+        int rollNo,
+        string name,
+        int age,
+        string course,
+        int marks)
+    {
+        try
+        {
+            Student student = SearchStudent(rollNo);
 
             // Student not found
             if (student == null)
             {
-                Console.WriteLine(
-                    "\nStudent Not Found.");
-
-                return;
+                Console.WriteLine("Student Not Found.");
+                return false;
             }
 
+            student.name = name;
+            student.age = age;
+            student.Course = course;
+            student.Marks = marks;
 
-            // Student found
-            Console.WriteLine(
-                "\nStudent Found!");
+            Console.WriteLine("Student updated successfully.");
 
-            Console.WriteLine(
-                "\nName         : " + student.name);
-
-            Console.WriteLine(
-                "Age          : " + student.age);
-
-            Console.WriteLine(
-                "Roll Number  : " + student.RollNo);
-
-            Console.WriteLine(
-                "Course       : " + student.Course);
-
-            Console.WriteLine(
-                "Marks        : " + student.Marks);
-        }
-        catch (FormatException ex)
-        {
-            Console.WriteLine(
-                "\nInvalid Roll Number.");
-
-            Console.WriteLine(
-                "Error: " + ex.Message);
+            return true;
         }
         catch (Exception ex)
         {
-            Console.WriteLine(
-                "\nError: " + ex.Message);
+            Console.WriteLine("Error: " + ex.Message);
+            return false;
         }
     }
 
 
-    // ==================================================
-    // UPDATE STUDENT
-    // ==================================================
-
-    static void UpdateStudent(StudentManager manager)
+    // Delete Student
+    public override bool DeleteStudent(int rollNo)
     {
         try
         {
-            Console.Write(
-                "\nEnter Roll Number to Update: ");
-
-            int rollNo = int.Parse(
-                Console.ReadLine());
-
-
-            Student existingStudent =
-                manager.SearchStudent(rollNo);
-
-
-            // Student not found
-            if (existingStudent == null)
-            {
-                Console.WriteLine(
-                    "\nStudent Not Found.");
-
-                return;
-            }
-
-
-            Console.Write("Enter New Name: ");
-            string name = Console.ReadLine();
-
-            Console.Write("Enter New Age: ");
-            int age = int.Parse(
-                Console.ReadLine());
-
-            Console.Write("Enter New Course: ");
-            string course = Console.ReadLine();
-
-            Console.Write("Enter New Marks: ");
-            int marks = int.Parse(
-                Console.ReadLine());
-
-
-            bool result =
-                manager.UpdateStudent(
-                    rollNo,
-                    name,
-                    age,
-                    course,
-                    marks
-                );
-
-
-            if (result)
-            {
-                Console.WriteLine(
-                    "\nStudent Updated Successfully.");
-            }
-            else
-            {
-                Console.WriteLine(
-                    "\nStudent Update Failed.");
-            }
-        }
-        catch (FormatException ex)
-        {
-            Console.WriteLine(
-                "\nPlease enter valid values.");
-
-            Console.WriteLine(
-                "Error: " + ex.Message);
-        }
-        catch (ArgumentException ex)
-        {
-            Console.WriteLine(
-                "\nInvalid Student Data.");
-
-            Console.WriteLine(
-                "Error: " + ex.Message);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(
-                "\nError: " + ex.Message);
-        }
-    }
-
-
-    // ==================================================
-    // DELETE STUDENT
-    // ==================================================
-
-    static void DeleteStudent(StudentManager manager)
-    {
-        try
-        {
-            Console.Write(
-                "\nEnter Roll Number to Delete: ");
-
-            int rollNo = int.Parse(
-                Console.ReadLine());
-
-
-            Student student =
-                manager.SearchStudent(rollNo);
-
+            Student student = SearchStudent(rollNo);
 
             // Student not found
             if (student == null)
             {
-                Console.WriteLine(
-                    "\nStudent Not Found.");
-
-                return;
+                Console.WriteLine("Student Not Found.");
+                return false;
             }
 
+            students.Remove(student);
 
-            bool result =
-                manager.DeleteStudent(rollNo);
+            Console.WriteLine("Student deleted successfully.");
 
-
-            if (result)
-            {
-                Console.WriteLine(
-                    "\nStudent Deleted Successfully.");
-            }
-            else
-            {
-                Console.WriteLine(
-                    "\nStudent Delete Failed.");
-            }
-        }
-        catch (FormatException ex)
-        {
-            Console.WriteLine(
-                "\nInvalid Roll Number.");
-
-            Console.WriteLine(
-                "Error: " + ex.Message);
+            return true;
         }
         catch (Exception ex)
         {
-            Console.WriteLine(
-                "\nError: " + ex.Message);
+            Console.WriteLine("Error: " + ex.Message);
+            return false;
         }
+        finally
+        {
+            Console.WriteLine("Delete operation completed.");
+        }
+    }
+
+
+    // Return Student List
+    public List<Student> GetStudents()
+    {
+        return students;
+    }
+
+
+    // Set Student List
+    public void SetStudents(List<Student> loadedStudents)
+    {
+        if (loadedStudents == null)
+        {
+            Console.WriteLine("Student list is null.");
+            return;
+        }
+
+        students = loadedStudents;
     }
 }
